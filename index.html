@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>골드(XAUUSD) 자산 지킴이</title>
   <style>
     body {
@@ -15,18 +16,21 @@
     }
     .box {
       max-width: 420px;
-      margin: 50px auto 0 auto;
+      width: 96vw;
+      margin: 30px auto 0 auto;
       background: rgba(20,30,60,0.85);
       border-radius: 18px;
       box-shadow: 0 4px 24px #00172e60;
-      padding: 30px 26px 30px 26px;
+      padding: 5vw 4vw 7vw 4vw;
       z-index: 1;
       position: relative;
+      min-width: 0;
+      box-sizing: border-box;
     }
     h2 {
       text-align: center;
       color: #e2eafc;
-      font-size: 1.5em;
+      font-size: 1.35em;
       letter-spacing: 1.5px;
       margin-bottom: 8px;
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -35,7 +39,7 @@
     .desc {
       text-align: center;
       color: #a4c7fa;
-      font-size: 1.04em;
+      font-size: 1em;
       margin-bottom: 15px;
       letter-spacing: 1px;
       text-shadow: 0 1px 8px #192142;
@@ -50,7 +54,7 @@
     }
     input {
       width: 100%;
-      padding: 10px;
+      padding: 9px;
       margin-top: 7px;
       background: #101b2a;
       color: #fff9e9;
@@ -58,6 +62,7 @@
       border-radius: 8px;
       font-size: 1.07em;
       box-shadow: 0 1px 5px #131c2e80 inset;
+      box-sizing: border-box;
     }
     input:focus {
       outline: 2px solid #61aaff;
@@ -69,7 +74,7 @@
       text-align: center;
       color: #ff4970;
       font-weight: bold;
-      font-size: 1.11em;
+      font-size: 1.1em;
       letter-spacing: 1px;
       text-shadow: 0 0px 10px #38162260;
       display: none;
@@ -82,7 +87,7 @@
       color: #fff;
       border: none;
       border-radius: 8px;
-      font-size: 1.15em;
+      font-size: 1.1em;
       font-weight: bold;
       letter-spacing: 1px;
       box-shadow: 0 2px 8px #131b2e60;
@@ -95,26 +100,28 @@
     .result {
       background: rgba(18,28,54,0.7);
       margin-top: 23px;
-      padding: 18px 14px 13px 14px;
+      padding: 16px 10px 13px 10px;
       border-radius: 10px;
       color: #e0e8fd;
-      font-size: 1.13em;
+      font-size: 1.08em;
       box-shadow: 0 2px 10px #0a1330bb;
+      word-break: keep-all;
     }
     .loss { color: #ff4970; font-weight: bold; }
     .remain { color: #44ffb7; font-weight: bold; }
     .extra { color: #ff8660; font-weight: bold; }
     .slogan {
-      margin-top: 55px;
+      margin-top: 40px;
       text-align: center;
       color: #a9c5ff;
       font-weight: bold;
-      font-size: 1.18em;
+      font-size: 1.08em;
       letter-spacing: 1px;
       font-family: 'Segoe UI', Arial, sans-serif;
       text-shadow: 0 1px 12px #212b48;
       z-index: 1;
       position: relative;
+      word-break: keep-all;
     }
     .star {
       position: absolute;
@@ -132,12 +139,23 @@
     .maxlot {
       color: #ffee66;
       font-weight: bold;
-      font-size: 0.98em;
+      font-size: 0.97em;
       margin-top: 3px;
       margin-bottom: 10px;
       text-align: right;
       letter-spacing: 0.5px;
       display: block;
+    }
+    @media (max-width: 700px) {
+      .box { padding: 7vw 3vw 8vw 3vw; }
+      h2 { font-size: 1.08em; }
+      .desc { font-size: 0.98em; }
+      button { font-size: 1em; }
+    }
+    @media (max-width: 500px) {
+      .box { max-width: 99vw; width: 99vw; padding: 8vw 2vw 10vw 2vw;}
+      .result { font-size: 0.97em; }
+      .slogan { font-size: 0.97em; }
     }
   </style>
 </head>
