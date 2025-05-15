@@ -2,32 +2,128 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>골드(XAUUSD) 손실액 계산기</title>
+  <title>골드(XAUUSD) 손익계산기</title>
   <style>
-    body { font-family: '맑은 고딕', Arial, sans-serif; background: #f4f6fb; padding: 30px; }
-    .box { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 10px #eee; padding: 24px; }
-    h2 { text-align: center; color: #4a6fa5; }
-    label { font-weight: bold; margin-top: 10px; display: block; }
-    input { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; }
-    button { width: 100%; margin-top: 20px; padding: 10px; background: #4a6fa5; color: #fff; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; }
-    .result { background: #f2fbfc; margin-top: 20px; padding: 14px; border-radius: 6px; color: #214c7a; font-size: 1.1em; }
-    .loss { color: #d93025; font-weight: bold; }
-    .remain { color: #0e8058; font-weight: bold; }
-    .extra { color: #d93025; font-weight: bold; }
-    .slogan {
-      margin-top: 40px;
+    body {
+      font-family: '맑은 고딕', Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+      color: #d1e5ff;
+      position: relative;
+      overflow-x: hidden;
+    }
+    /* 별똥별 효과 */
+    .stars, .stars2, .stars3 {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      display:block;
+      z-index: 0;
+    }
+    .box {
+      max-width: 410px;
+      margin: 50px auto 0 auto;
+      background: rgba(20,30,60,0.85);
+      border-radius: 18px;
+      box-shadow: 0 4px 24px #00172e60;
+      padding: 30px 26px 30px 26px;
+      z-index: 1;
+      position: relative;
+    }
+    h2 {
       text-align: center;
-      color: #2981d9;
+      color: #e2eafc;
+      font-size: 1.5em;
+      letter-spacing: 1.5px;
+      margin-bottom: 18px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      text-shadow: 0 2px 10px #293855;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 13px;
+      display: block;
+      color: #a4c7fa;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 8px #192142;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 7px;
+      background: #101b2a;
+      color: #fff9e9;
+      border: 1px solid #284569;
+      border-radius: 8px;
+      font-size: 1.07em;
+      box-shadow: 0 1px 5px #131c2e80 inset;
+    }
+    input:focus {
+      outline: 2px solid #61aaff;
+      background: #14223a;
+    }
+    button {
+      width: 100%;
+      margin-top: 25px;
+      padding: 11px 0;
+      background: linear-gradient(90deg, #2540a8 0%, #6336e5 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.15em;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px #131b2e60;
+      cursor: pointer;
+      transition: background 0.25s;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #317ec9 0%, #7551f7 100%);
+    }
+    .result {
+      background: rgba(18,28,54,0.7);
+      margin-top: 23px;
+      padding: 18px 14px 13px 14px;
+      border-radius: 10px;
+      color: #e0e8fd;
+      font-size: 1.13em;
+      box-shadow: 0 2px 10px #0a1330bb;
+    }
+    .loss { color: #ff4970; font-weight: bold; }
+    .remain { color: #44ffb7; font-weight: bold; }
+    .extra { color: #ff8660; font-weight: bold; }
+    .slogan {
+      margin-top: 55px;
+      text-align: center;
+      color: #a9c5ff;
       font-weight: bold;
       font-size: 1.18em;
       letter-spacing: 1px;
       font-family: 'Segoe UI', Arial, sans-serif;
+      text-shadow: 0 1px 12px #212b48;
+      z-index: 1;
+      position: relative;
+    }
+    /* 우주 속 별 표현 */
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 0;
+      animation: twinkle 2.7s infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.5; }
+      to   { opacity: 1; }
     }
   </style>
 </head>
 <body>
+  <!-- 별 랜덤 생성 (아래 스크립트로 만듦) -->
+  <div id="stars"></div>
   <div class="box">
-    <h2>골드(XAUUSD) 손실액 계산기</h2>
+    <h2>골드(XAUUSD) 손익계산기</h2>
     <label>현재 자산 (USD)</label>
     <input type="number" id="asset" placeholder="예: 1000">
 
@@ -42,9 +138,26 @@
     <div id="result" class="result" style="display:none;"></div>
   </div>
   <div class="slogan">
-    Take a chance, change your life!
+    🚀 Take a chance, change your life!
   </div>
   <script>
+    // 우주 별 랜덤 생성
+    function createStars(count = 80) {
+      const starsDiv = document.getElementById('stars');
+      for (let i = 0; i < count; i++) {
+        let s = document.createElement('div');
+        s.className = 'star';
+        let size = Math.random() * 2.6 + 1.2;
+        s.style.width = s.style.height = size + "px";
+        s.style.left = Math.random() * 100 + "vw";
+        s.style.top = Math.random() * 98 + "vh";
+        s.style.opacity = (Math.random() * 0.55 + 0.45).toFixed(2);
+        s.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
+        starsDiv.appendChild(s);
+      }
+    }
+    createStars(80);
+
     function calculate() {
       const asset = parseFloat(document.getElementById('asset').value);
       const lot = parseFloat(document.getElementById('lot').value);
