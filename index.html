@@ -15,13 +15,13 @@
       overflow-x: hidden;
     }
     .box {
-      max-width: 420px;
-      width: 96vw;
-      margin: 30px auto 0 auto;
+      max-width: 410px;
+      width: 92vw;
+      margin: 36px auto 0 auto;
       background: rgba(20,30,60,0.85);
       border-radius: 18px;
       box-shadow: 0 4px 24px #00172e60;
-      padding: 5vw 4vw 7vw 4vw;
+      padding: 38px 20px 32px 20px;
       z-index: 1;
       position: relative;
       min-width: 0;
@@ -30,7 +30,7 @@
     h2 {
       text-align: center;
       color: #e2eafc;
-      font-size: 1.35em;
+      font-size: 1.32em;
       letter-spacing: 1.5px;
       margin-bottom: 8px;
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -147,13 +147,13 @@
       display: block;
     }
     @media (max-width: 700px) {
-      .box { padding: 7vw 3vw 8vw 3vw; }
+      .box { padding: 7vw 5vw 8vw 5vw; width: 98vw; }
       h2 { font-size: 1.08em; }
       .desc { font-size: 0.98em; }
       button { font-size: 1em; }
     }
     @media (max-width: 500px) {
-      .box { max-width: 99vw; width: 99vw; padding: 8vw 2vw 10vw 2vw;}
+      .box { max-width: 99vw; width: 99vw; padding: 10vw 3vw 12vw 3vw;}
       .result { font-size: 0.97em; }
       .slogan { font-size: 0.97em; }
     }
@@ -203,7 +203,6 @@
     createStars(80);
 
     function calcMaxLot(asset) {
-      // 자산 10000달러 기준 0.2랏, 비례 계산
       return Math.floor(asset / 10000 * 0.2 * 100) / 100; // 소수점 2자리
     }
 
