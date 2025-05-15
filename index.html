@@ -13,6 +13,7 @@
     .result { background: #f2fbfc; margin-top: 20px; padding: 14px; border-radius: 6px; color: #214c7a; font-size: 1.1em; }
     .loss { color: #d93025; font-weight: bold; }
     .remain { color: #0e8058; font-weight: bold; }
+    .extra { color: #d93025; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -46,12 +47,19 @@
       const loss = lot * pip * 10;
       const percent = (loss / asset) * 100;
       const remain = asset - loss;
+      let remainMsg = "";
+
+      if (remain >= 0) {
+        remainMsg = `남은 금액: <span class="remain">${remain.toFixed(2)}달러</span>`;
+      } else {
+        remainMsg = `<span class="extra">추가 입금 필요 금액: ${Math.abs(remain).toFixed(2)}달러</span>`;
+      }
 
       document.getElementById('result').innerHTML =
         `<b>${pip} pip = ${goldPriceChange.toFixed(2)}달러(금 가격 변동)</b><br>` +
         `예상 손실액: <span class="loss">-${loss.toFixed(2)}달러</span><br>` +
         `자산 대비 손실률: <b>${percent.toFixed(2)}%</b><br>` +
-        `남은 금액: <span class="remain">${remain.toFixed(2)}달러</span>`;
+        remainMsg;
 
       document.getElementById('result').style.display = 'block';
     }
