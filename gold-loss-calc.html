@@ -1,56 +1,343 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>골드(XAUUSD) 손실액 계산기</title>
+  <meta charset="UTF-8" />
+  <title>선물거래 랏 지킴이 • XAU • BTC • US100</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: '맑은 고딕', Arial, sans-serif; background: #f4f6fb; padding: 30px; }
-    .box { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 10px #eee; padding: 24px; }
-    h2 { text-align: center; color: #4a6fa5; }
-    label { font-weight: bold; margin-top: 10px; display: block; }
-    input { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; }
-    button { width: 100%; margin-top: 20px; padding: 10px; background: #4a6fa5; color: #fff; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; }
-    .result { background: #f2fbfc; margin-top: 20px; padding: 14px; border-radius: 6px; color: #214c7a; font-size: 1.1em; }
+    :root{
+      /* 베이스 */
+      --bg:#080c1a; --bg2:#0b1022;
+      --card:#111a33; --panel:#0c1530;
+      --text:#e8eeff; --muted:#96a7cc;
+      --edge:rgba(255,255,255,.09);
+      --glow: 0 8px 30px rgba(126,123,255,.25);
+
+      /* 동적 테마 색 (상품별로 JS가 바꿈) */
+      --accent:#9b8cff;
+      --accent2:#34c5ff;
+      --orb1a:#9b8cff; --orb1b:#5b7dff;
+      --orb2a:#34c5ff; --orb2b:#7fb7ff;
+
+      /* 상태색 */
+      --danger:#ff6b7a; --ok:#4ade80;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; padding:28px; color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% 5%, #151b39 0%, var(--bg2) 55%, var(--bg) 100%),
+        radial-gradient(1000px 800px at 90% 10%, #141e3f55 0%, transparent 60%),
+        linear-gradient(180deg, #0b0f1d 0%, #070a15 100%);
+      font-family: "맑은 고딕", Arial, sans-serif;
+      overflow-x:hidden;
+    }
+    /* 우주 오브젝트 (테마에 따라 색이 변함) */
+    .orb{position:fixed; border-radius:50%; filter: blur(32px); opacity:.35; pointer-events:none}
+    .orb.one{
+      width:220px; height:220px; right:-60px; top:-40px;
+      background: radial-gradient(circle at 30% 30%, var(--orb1a) 0%, var(--orb1b) 50%, transparent 70%);
+      animation: float1 16s ease-in-out infinite;
+    }
+    .orb.two{
+      width:280px; height:280px; left:-80px; bottom:-60px;
+      background: radial-gradient(circle at 60% 40%, var(--orb2a) 0%, var(--orb2b) 55%, transparent 75%);
+      animation: float2 20s ease-in-out infinite;
+    }
+    @keyframes float1{0%{transform:translateY(0)}50%{transform:translateY(18px)}100%{transform:translateY(0)}}
+    @keyframes float2{0%{transform:translateY(0)}50%{transform:translateY(-14px)}100%{transform:translateY(0)}}
+
+    .box{
+      max-width: 760px; margin: 0 auto; background: linear-gradient(180deg, #121a33 0%, #0f1730 100%);
+      border:1px solid var(--edge); border-radius:16px; box-shadow: var(--glow); overflow:hidden; position:relative;
+    }
+    .head{
+      padding:26px 18px; background:linear-gradient(180deg,#1a2250 0%, #151c42 100%);
+      border-bottom:1px solid var(--edge); text-align:center; position:relative;
+    }
+    .title{
+      margin:0; font-size:28px; font-weight:900; letter-spacing:.3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .sub{margin-top:8px; color:var(--muted); font-size:.93em}
+    .pill{display:inline-block; padding:2px 8px; border-radius:999px; background:#0b1730; border:1px solid var(--edge); color:#a9b9dd; font-size:12px}
+
+    .inner{padding:18px 18px 8px 18px}
+    label{font-weight:800; display:block; margin-top:12px}
+    select,input{
+      width:100%; margin-top:6px; padding:12px 12px; border-radius:10px;
+      border:1px solid var(--edge); background:#0b132c; color:var(--text); font-size:16px; outline:none;
+    }
+    .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px}
+    .field{position:relative}
+    .pip-badge{
+      position:absolute; right:8px; bottom:10px; transform: translateY(50%);
+      background:#0c1836; border:1px solid var(--edge); color:#c7d6ff;
+      font-size:12px; padding:4px 8px; border-radius:999px;
+    }
+
+    button{
+      width:100%; margin-top:14px; padding:14px 12px; border:none; border-radius:12px;
+      background: linear-gradient(90deg,var(--accent), var(--accent2)); color:white; font-weight:900; font-size:1.06em; cursor:pointer;
+      box-shadow: 0 8px 22px rgba(0,0,0,.25);
+    }
+    button:hover{filter: brightness(1.05)}
+
+    .result{
+      margin-top:16px; padding:16px; border-radius:12px; background:var(--panel); border:1px solid var(--edge);
+      line-height:1.8; font-size:1.06em;
+    }
+    .muted{color:var(--muted)}
+    .kv{display:flex; justify-content:space-between; gap:12px}
+    .kv b{color:#d6e2ff}
+    .hr{height:1px; background:var(--edge); margin:12px 0}
+    .neg{color:var(--danger); font-weight:800}
+    .pos{color:var(--ok); font-weight:800}
+
+    .badge{
+      margin-top:12px; padding:10px; border-radius:10px; text-align:center; font-weight:900; display:none;
+      border:1px solid var(--edge);
+    }
+    .badge.over{background:rgba(255,107,122,.10); color:var(--danger); border-color: rgba(255,107,122,.45)}
+    .badge.ok{background:rgba(74,222,128,.10); color:var(--ok); border-color: rgba(74,222,128,.45)}
+
+    .footer{margin:14px 0 18px; text-align:center; color:#a8b8da; font-size:.9em}
+    .hint{color:var(--muted); font-size:.9em; margin-top:8px}
+    .explain{
+      margin-top:10px; padding:12px; border-radius:12px; background:#0c1836; border:1px dashed var(--edge);
+      color:#c7d6ff; line-height:1.6; display:flex; justify-content:space-between; align-items:center; gap:12px;
+    }
+    .tag{display:inline-block; padding:2px 8px; border-radius:999px; background:#0c1836; border:1px solid var(--edge); color:#9fb0df; font-size:12px; margin-right:6px}
+    .simple{font-weight:800}
   </style>
 </head>
 <body>
+  <!-- 우주 오브젝트 -->
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+
   <div class="box">
-    <h2>골드(XAUUSD) 손실액 계산기</h2>
-    <label>현재 자산 (USD)</label>
-    <input type="number" id="asset" placeholder="예: 1000">
+    <div class="head">
+      <h1 class="title">선물거래 랏 지킴이</h1>
+      <div class="sub">
+        <span class="pill">손실액 = 랏 × pip × (랏당 pip 손익)</span>
+        <span class="pill">변동폭은 달러 입력 • pip 자동환산</span>
+      </div>
+    </div>
 
-    <label>총 랏</label>
-    <input type="number" id="lot" placeholder="예: 1" step="0.01">
+    <div class="inner">
+      <!-- 상품 선택 -->
+      <label for="category">상품</label>
+      <select id="category" onchange="updateTheme(); updateExplain(); updateLimits(); updatePipHint();">
+        <option value="XAU">골드 (XAUUSD)</option>
+        <option value="BTC">비트 (BTCUSD)</option>
+        <option value="US100">나스닥 (US100)</option>
+      </select>
 
-    <label>변동폭 (pip)</label>
-    <input type="number" id="pip" placeholder="예: 5">
+      <!-- 심플 허용랏 설명 -->
+      <div class="explain" id="explainBox">
+        <div><span class="tag" id="tagLabel">골드 (XAUUSD)</span></div>
+        <div class="simple" id="simpleRule">10,000$ > 0.1랏 3개</div>
+      </div>
 
-    <button onclick="calculate()">계산하기</button>
+      <!-- 현재 자본 기준 허용 & 오버 여부 -->
+      <div class="hint" id="limitHint"></div>
+      <div id="lotBadge" class="badge"></div>
 
-    <div id="result" class="result" style="display:none;"></div>
+      <!-- 입력 -->
+      <div class="row3" style="margin-top:6px">
+        <div class="field">
+          <label for="asset">자본 (USD)</label>
+          <input type="number" id="asset" placeholder="예: 10000" value="10000" step="1" min="0" inputmode="decimal" oninput="updateLimits()">
+        </div>
+        <div class="field">
+          <label for="lot">랏수</label>
+          <input type="number" id="lot" placeholder="예: 0.1" step="0.01" min="0" inputmode="decimal" oninput="updateLimits()">
+        </div>
+        <div class="field">
+          <label for="moveUSD">변동폭 (달러)</label>
+          <input type="number" id="moveUSD" placeholder="예: 300" step="0.01" min="0" inputmode="decimal" oninput="updatePipHint()">
+          <div id="pipBadge" class="pip-badge">≈ - pip</div>
+        </div>
+      </div>
+
+      <button onclick="calculate()">🛰 계산하기</button>
+
+      <!-- 결과 -->
+      <div id="result" class="result" style="display:none;"></div>
+
+      <div class="footer">🚀 Take a chance, change your life ✨️</div>
+    </div>
   </div>
-  <script>
-    function calculate() {
-      const asset = parseFloat(document.getElementById('asset').value);
-      const lot = parseFloat(document.getElementById('lot').value);
-      const pip = parseFloat(document.getElementById('pip').value);
 
-      if (isNaN(asset) || isNaN(lot) || isNaN(pip)) {
-        alert('모든 값을 입력해주세요!');
-        return;
+  <script>
+    // ===== pip 기준 & 손익 (고정) =====
+    // pipDollar: 1 pip의 "달러 변동" (XAU:$0.1, BTC:$1, US100: pt=달러 입력과 1:1로 간주)
+    // pipValuePerLot: 1랏 × 1pip 손익 (USD)
+    const CONFIG = {
+      XAU: { label:'골드 (XAUUSD)', pipDollar:0.10, pipValuePerLot:10 },
+      BTC: { label:'비트 (BTCUSD)', pipDollar:1,    pipValuePerLot:1  },
+      US100:{ label:'나스닥 (US100)', pipDollar:1,  pipValuePerLot:1  } // pt당 $10 브로커면 이 값을 10으로 바꾸세요.
+    };
+
+    // ===== 상품별 허용랏 규칙(간단 설명 전용) =====
+    // 표시 문구를 요청하신 형태로 "그냥" 보여줍니다.
+    const SIMPLE_RULE_TEXT = {
+      XAU: '10,000$ >0.1랏 3개',
+      BTC: '10,000$ >0.1랏 1개',
+      US100:'10,000$ >0.1랏 7개'
+    };
+
+    // 실제 계산에 쓰이는 "10,000달러당 0.1랏 개수"
+    const RULES = {
+      XAU: { lotUnit: 0.1, unitsPer10k: 3 },
+      BTC: { lotUnit: 0.1, unitsPer10k: 1 },
+      US100: { lotUnit: 0.1, unitsPer10k: 7 }
+    };
+
+    // ===== 상품별 색상 테마 (골드/주황/푸른) =====
+    const THEMES = {
+      XAU: { accent:'#d4af37', accent2:'#ffd24d', orb1a:'#ffd766', orb1b:'#d4af37', orb2a:'#fff0a6', orb2b:'#ffd24d' }, // 골드
+      BTC: { accent:'#f7931a', accent2:'#ffb347', orb1a:'#ff9f2b', orb1b:'#f7931a', orb2a:'#ffd27f', orb2b:'#ffae42' }, // 주황
+      US100: { accent:'#5b7dff', accent2:'#34c5ff', orb1a:'#5b7dff', orb1b:'#34c5ff', orb2a:'#7fb7ff', orb2b:'#5b7dff' } // 푸른
+    };
+
+    const categoryEl = document.getElementById('category');
+    const assetEl = document.getElementById('asset');
+    const lotEl   = document.getElementById('lot');
+    const moveUSDEl = document.getElementById('moveUSD');
+
+    const tagLabelEl = document.getElementById('tagLabel');
+    const simpleRuleEl = document.getElementById('simpleRule');
+    const limitHintEl  = document.getElementById('limitHint');
+    const lotBadgeEl   = document.getElementById('lotBadge');
+    const pipBadgeEl   = document.getElementById('pipBadge');
+    const resultEl     = document.getElementById('result');
+
+    function fmt(n, d=2){ if(!isFinite(n)) return '-'; return Number(n).toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+    function cfg(){ return CONFIG[categoryEl.value]; }
+    function rule(){ return RULES[categoryEl.value]; }
+
+    function updateTheme(){
+      const t = THEMES[categoryEl.value];
+      const root = document.documentElement;
+      root.style.setProperty('--accent', t.accent);
+      root.style.setProperty('--accent2', t.accent2);
+      root.style.setProperty('--orb1a', t.orb1a);
+      root.style.setProperty('--orb1b', t.orb1b);
+      root.style.setProperty('--orb2a', t.orb2a);
+      root.style.setProperty('--orb2b', t.orb2b);
+    }
+
+    function updateExplain(){
+      const key = categoryEl.value;
+      tagLabelEl.textContent = CONFIG[key].label;
+      simpleRuleEl.textContent = SIMPLE_RULE_TEXT[key];
+      resultEl.style.display = 'none';
+    }
+
+    function allowedUnits(asset){
+      const r = rule();
+      if (!isFinite(asset) || asset <= 0) return 0;
+      return Math.floor((asset / 10000) * r.unitsPer10k); // 0.1랏 "개수"
+    }
+    function allowedMaxLot(asset){
+      const r = rule();
+      return allowedUnits(asset) * r.lotUnit; // 0.1 × 개수
+    }
+
+    function updateLimits(){
+      const asset = parseFloat(assetEl.value);
+      const lot   = parseFloat(lotEl.value);
+      const units = allowedUnits(asset);
+      const maxLot = allowedMaxLot(asset);
+
+      // 현재 자본 기준 허용 (동적)
+      if (units === 0){
+        limitHintEl.innerHTML = `현재 자본 기준 허용: <b>0.0랏</b> (0.1랏 기준 <b>0개</b>)`;
+      } else {
+        limitHintEl.innerHTML = `현재 자본 기준 허용: <b>${fmt(maxLot,1)}랏</b> (0.1랏 기준 <b>${units}개</b>)`;
       }
 
-      // 1pip = 0.1달러(금값 변동), 1랏 1pip = 10달러 손익
-      const goldPriceChange = pip * 0.1;
-      const loss = lot * pip * 10;
-      const percent = (loss / asset) * 100;
-
-      document.getElementById('result').innerHTML =
-        `<b>${pip} pip = ${goldPriceChange.toFixed(2)}달러(금 가격 변동)</b><br>` +
-        `예상 손실액: <b>${loss.toFixed(2)}달러</b><br>` +
-        `자산 대비 손실률: <b>${percent.toFixed(2)}%</b>`;
-      document.getElementById('result').style.display = 'block';
+      // 랏 오버 배지
+      if (isFinite(lot) && isFinite(maxLot) && lot > maxLot){
+        lotBadgeEl.style.display = 'block';
+        lotBadgeEl.className = 'badge over';
+        lotBadgeEl.textContent = '랏 오버!';
+      } else if (isFinite(lot) && lot >= 0){
+        lotBadgeEl.style.display = 'block';
+        lotBadgeEl.className = 'badge ok';
+        lotBadgeEl.textContent = '허용 범위';
+      } else {
+        lotBadgeEl.style.display = 'none';
+      }
     }
+
+    // 달러 → pip 자동 환산 배지
+    function updatePipHint(){
+      const c = cfg();
+      const key = categoryEl.value;
+      const moveUSD = parseFloat(moveUSDEl.value);
+      if (!isFinite(moveUSD) || moveUSD < 0){
+        pipBadgeEl.textContent = '≈ - pip';
+        return;
+      }
+      const pip = moveUSD / c.pipDollar; // 공통 환산
+      const unitHint = (key==='US100') ? 'pip(=pt)' : 'pip';
+      pipBadgeEl.textContent = `≈ ${fmt(pip, 2)} ${unitHint}`;
+    }
+
+    function calculate(){
+      const c = cfg();
+      const key = categoryEl.value;
+
+      const asset = parseFloat(assetEl.value);
+      const lot   = parseFloat(lotEl.value);
+      const moveUSD  = parseFloat(moveUSDEl.value);
+
+      if (isNaN(asset) || isNaN(lot) || isNaN(moveUSD)) { alert('모든 값을 입력해주세요!'); return; }
+      if (asset <= 0) { alert('자본(USD)은 0보다 커야 합니다.'); return; }
+      if (lot < 0 || moveUSD < 0) { alert('랏수와 변동폭(달러)은 0 이상이어야 합니다.'); return; }
+
+      // 달러 → pip 환산
+      const pip = moveUSD / c.pipDollar;
+
+      // 손실액: 랏 × pip × (랏당 pip 손익)
+      const loss = lot * pip * c.pipValuePerLot;
+      const pct  = (loss / asset) * 100;
+      const remain = asset - loss;
+
+      const unitHint = (key==='US100') ? 'pip(=pt)' : 'pip';
+
+      resultEl.innerHTML =
+        `<div class="kv"><div>변동폭</div><div><b>$${fmt(moveUSD,2)}</b> → ≈ ${fmt(pip,2)} ${unitHint}</div></div>` +
+        `<div class="hr"></div>` +
+        `<div class="kv"><div>예상 손실액</div><div class="neg">-$${fmt(loss,2)}</div></div>` +
+        `<div class="kv"><div>자본 대비 손실률</div><div><b>${fmt(pct,2)}%</b></div></div>` +
+        `<div class="kv"><div>남은 금액</div><div class="${remain>=0?'pos':'neg'}">$${fmt(remain,2)}</div></div>`;
+      resultEl.style.display = 'block';
+
+      updateLimits(); // 계산 후에도 허용 랏/오버 갱신
+    }
+
+    // 초기화
+    (function init(){
+      categoryEl.value = 'XAU';
+      updateTheme();
+      updateExplain();
+      updateLimits();
+      updatePipHint();
+
+      // Enter로 계산
+      [assetEl, lotEl, moveUSDEl].forEach(el=>{
+        el.addEventListener('keydown', e=>{ if(e.key==='Enter') calculate(); });
+      });
+
+      // 상품 바꿀 때도 즉시 계산 반영(선택)
+      categoryEl.addEventListener('change', ()=>{ if(resultEl.style.display!=='none'){ calculate(); }});
+    })();
   </script>
 </body>
 </html>
