@@ -49,7 +49,8 @@
     @keyframes float2{0%{transform:translateY(0)}50%{transform:translateY(-14px)}100%{transform:translateY(0)}}
 
     .box{
-      max-width: 760px; margin: 0 auto; background: linear-gradient(180deg, #121a33 0%, #0f1730 100%);
+      /* 가로 폭을 줄여 세로 느낌 강화 */
+      max-width: 520px; margin: 0 auto; background: linear-gradient(180deg, #121a33 0%, #0f1730 100%);
       border:1px solid var(--edge); border-radius:16px; box-shadow: var(--glow); overflow:hidden; position:relative;
     }
     .head{
@@ -70,10 +71,13 @@
       width:100%; margin-top:6px; padding:12px 12px; border-radius:10px;
       border:1px solid var(--edge); background:#0b132c; color:var(--text); font-size:16px; outline:none;
     }
-    .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px}
+    /* ✅ 항상 단일 컬럼 */
+    .row3{
+      display:grid; grid-template-columns: 1fr; gap:12px;
+    }
     .field{position:relative}
     .pip-badge{
-      position:absolute; right:8px; bottom:10px; transform: translateY(50%);
+      position:absolute; right:8px; bottom:8px;
       background:#0c1836; border:1px solid var(--edge); color:#c7d6ff;
       font-size:12px; padding:4px 8px; border-radius:999px;
     }
@@ -93,24 +97,25 @@
     .kv{display:flex; justify-content:space-between; gap:12px}
     .kv b{color:#d6e2ff}
     .hr{height:1px; background:var(--edge); margin:12px 0}
-    .neg{color:var(--danger); font-weight:800}
-    .pos{color:var(--ok); font-weight:800}
+    .neg{color:#ff6b7a; font-weight:800}
+    .pos{color:#4ade80; font-weight:800}
 
     .badge{
       margin-top:12px; padding:10px; border-radius:10px; text-align:center; font-weight:900; display:none;
       border:1px solid var(--edge);
     }
-    .badge.over{background:rgba(255,107,122,.10); color:var(--danger); border-color: rgba(255,107,122,.45)}
-    .badge.ok{background:rgba(74,222,128,.10); color:var(--ok); border-color: rgba(74,222,128,.45)}
+    .badge.over{background:rgba(255,107,122,.10); color:#ff6b7a; border-color: rgba(255,107,122,.45)}
+    .badge.ok{background:rgba(74,222,128,.10); color:#4ade80; border-color: rgba(74,222,128,.45)}
 
     .footer{margin:14px 0 18px; text-align:center; color:#a8b8da; font-size:.9em}
     .hint{color:var(--muted); font-size:.9em; margin-top:8px}
+    /* ✅ 설명 박스도 세로 정렬 */
     .explain{
       margin-top:10px; padding:12px; border-radius:12px; background:#0c1836; border:1px dashed var(--edge);
-      color:#c7d6ff; line-height:1.6; display:flex; justify-content:space-between; align-items:center; gap:12px;
+      color:#c7d6ff; line-height:1.6; display:block;
     }
     .tag{display:inline-block; padding:2px 8px; border-radius:999px; background:#0c1836; border:1px solid var(--edge); color:#9fb0df; font-size:12px; margin-right:6px}
-    .simple{font-weight:800}
+    .simple{display:block; font-weight:800; margin-top:6px}
   </style>
 </head>
 <body>
@@ -146,7 +151,7 @@
       <div class="hint" id="limitHint"></div>
       <div id="lotBadge" class="badge"></div>
 
-      <!-- 입력 -->
+      <!-- 입력 (세로로 나열) -->
       <div class="row3" style="margin-top:6px">
         <div class="field">
           <label for="asset">자본 (USD)</label>
@@ -183,11 +188,10 @@
     };
 
     // ===== 상품별 허용랏 규칙(간단 설명 전용) =====
-    // 표시 문구를 요청하신 형태로 "그냥" 보여줍니다.
     const SIMPLE_RULE_TEXT = {
-      XAU: '10,000$ >0.1랏 3개',
-      BTC: '10,000$ >0.1랏 1개',
-      US100:'10,000$ >0.1랏 7개'
+      XAU: '10,000$ > 0.1랏 3개',
+      BTC: '10,000$ > 0.1랏 1개',
+      US100:'10,000$ > 0.1랏 7개'
     };
 
     // 실제 계산에 쓰이는 "10,000달러당 0.1랏 개수"
